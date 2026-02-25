@@ -1,50 +1,217 @@
-# Enterprise Network & VoIP Configuration
+hostname HR-Router
+enable password cisco
+line console 0
+password cisco
+login
+exit
+banner motd #NO UNAUTHOIRSED ACCESS, THIS IS PUBLISHED BY LAW!!!!#
+service password-encryption
+no ip domain lookup
 
-## 📌 Project Overview
-This project demonstrates the design and implementation of a secure and scalable enterprise network integrated with VoIP services. The network supports multiple departments with VLAN segmentation to separate voice and data traffic, improving security, performance, and manageability.
+do wr
 
-## 🏢 Network Departments
-- HR Department  
-- Sales Department  
-- Finance Department  
-- ICT Department  
+--------------------------------------------------------
 
-## ⚙️ Technologies & Components
-- Cisco Routers and Switches  
-- VLAN Segmentation (Data & Voice VLAN)  
-- Inter-VLAN Routing (802.1Q)  
-- DHCP with Option 150  
-- OSPF Dynamic Routing  
-- IP Telephony (Call Manager Express)  
-- SSH Remote Access  
-- Packet Tracer Simulation  
+hostname Sale-Router
+enable password cisco
+line console 0
+password cisco
+login
+exit
+banner motd #NO UNAUTHOIRSED ACCESS, THIS IS PUBLISHED BY LAW!!!!#
+service password-encryption
+no ip domain lookup
 
-## 🔑 Key Features
-✅ Multi-department network architecture  
-✅ Secure routing and password encryption  
-✅ Voice and data traffic separation using VLANs  
-✅ Automatic IP address allocation via DHCP  
-✅ Dynamic routing with OSPF  
-✅ VoIP deployment with automatic IP phone registration  
-✅ Reduced broadcast traffic — improved performance  
+do wr
 
-## 📞 VoIP Configuration
-- Call Manager Express enabled on router  
-- IP phones auto-register with extensions  
-- Centralized voice communication across departments  
+----------------------------------------------------------
 
-## 🚀 Advantages
-- Scalable enterprise design  
-- Secure remote management  
-- Efficient voice and data communication  
-- Optimized network performance  
+hostname SER-SW
+enable password cisco
+line console 0
+password cisco
+login
+exit
+banner motd #NO UNAUTHOIRSED ACCESS, THIS IS PUBLISHED BY LAW!!!!#
+service password-encrption
+no ip domain lookup
 
-## 🧠 Learning Outcomes
-- VLAN and trunk configuration  
-- Inter-VLAN routing implementation  
-- DHCP and IP helper configuration  
-- Dynamic routing using OSPF  
-- Enterprise VoIP deployment  
+----------------------------------------------------
+for finanace  router
 
-## 👨‍💻 Author
-Your Name
+hostname FIN-Router
+enable password cisco
+line console 0
+password cisco
+login
+exit
+banner motd #NO UNAUTHOIRSED ACCESS, THIS IS PUBLISHED BY LAW!!!!#
+service password-encryption
+no ip domain lookup
+
+do wr
+
+----------------------------------------------
+
+hostname ICT-Router
+enable password cisco
+line console 0
+password cisco
+login
+exit
+banner motd #NO UNAUTHOIRSED ACCESS, THIS IS PUBLISHED BY LAW!!!!#
+service password-encryption
+no ip domain lookup
+
+------------------------------------------------------------
+
+ssh in all router
+
+username cisco password cisco
+ip domain name cisco.net
+crypto key generate rsa general-keys modulus 1024
+
+line vty 0 15
+login local
+transport input ssh
+exit
+
+-------------------------------------
+in switch
+
+
+vlan 20
+name DATA
+vlan 100
+name VOICE
+int fa0/1
+switchport mode trunk
+exit
+int range fa0/2-24
+switchport mode access
+switchport access vlan 20
+switchport voice vlan 100
+do wr
+
+
+vlan 50
+name DATA
+int fa0/1
+switchport mode trunk
+exit
+int range fa0/2-8
+switchport mode access
+switchport access vlan 50
+do wr
+
+
+----------------------------------------------
+
+in router ip Address for voice
+
+
+service dhcp
+ip dhcp excluded-address 172.16.100.1
+ip dhcp pool FINVOICE
+network 172.16.100.0 255.255.255.224
+default-router 172.16.100.1
+option 150 ip 172.16.100.1
+
+
+ip dhcp excluded-address 172.16.100.97
+ip dhcp pool ICTVOICE
+network 172.16.100.96 255.255.255.224
+default-router 172.16.100.97
+option 150 ip 172.16.100.97
+
+
+------------------------
+
+ip helper
+
+
+int fa0/0.20
+encapsulation dot1q 20
+ip add 192.168.100.33 255.255.255.224
+ip helper-address 192.168.100.130
+exit
+int fa0/0.100
+encapsulation dot1q 100
+ip add 172.16.100.33 255.255.255.224
+exit
+
+
+
+--------
+int fa0/0.100
+encapsulation dot1q 100
+ip add 172.16.100.33 255.255.255.224
+exit
+---------
+
+
+
+int fa0/0.40
+encapsulation dot1q 40
+ip add 192.168.100.97 255.255.255.224
+ip helper-address 192.168.100.130
+exit
+int fa0/0.100
+encapsulation dot1q 100
+ip add 172.16.100.97 255.255.255.224
+exit
+
+
+int fa0/1.50
+encapsulation dot1q 50
+ip add 192.168.100.129 255.255.255.248
+exit
+
+
+------------------------------
+
+ospf routing protocol
+
+router ospf 10
+network 10.10.10.4 0.0.0.3 area 0
+network 10.10.10.0 0.0.0.3 area 0
+network 172.16.100.0 0.0.0.31 area 0
+network 192.168.100.0 0.0.0.31 area 0
+
+router ospf 10
+network 10.10.10.8 0.0.0.3 area 0
+network 10.10.10.12 0.0.0.3 area 0
+network 172.16.100.64 0.0.0.31 area 0
+network 192.168.100.64 0.0.0.31 area 0
+
+
+
+
+------------------------------
+
+telephony-service
+max-dn 20
+max-ephones 20
+ip source-address 172.16.100.97 port 2000
+auto assign 1 to 20
+exit
+ephone-dn 1
+number 401
+ephone-dn 2
+number 402
+ephone-dn 3
+number 403
+ephone-dn 4
+number 404
+ephone-dn 5
+number 405
+ephone-dn 6
+number 406
+ephone-dn 7
+number 407
+ephone-dn 8
+number 408
+ephone-dn 9
+number 409
+ephone-dn 10
+number 410
